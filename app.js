@@ -1,20 +1,54 @@
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+require('dotenv').config()
+const express = require('express')
+const path = require('path')
+const cookieParser = require('cookie-parser')
+const logger = require('morgan')
+const cookieSession = require('cookie-session')
+const passport = require('passport')
+const passportSetup = require('./config/passport-setup')
+// Routes
+const indexRouter = require('./routes/index')
+const authRouter = require('./routes/auth')
+// Passport Auth
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
 
-var app = express();
+let app = express();
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(logger('dev'))
+app.use(express.json())
+app.use(express.urlencoded({
+  extended: false
+}))
+app.use(cookieParser())
+app.use(express.static(path.join(__dirname, 'public')))
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+// set up session cookies
+app.use(cookieSession({
+  maxAge: 24 * 60 * 60 * 1000,
+  keys: [process.env.COOKIE_SECRET]
+}))
 
-module.exports = app;
+// Middleware to initizilize passport & session
+app.use(passport.initialize())
+app.use(passport.session())
+
+app.use('/', indexRouter)
+app.use('/auth', authRouter)
+
+// Error Handling Below
+app.use((err, req, res, next) => {
+  const status = err.status || 500
+  res.status(status).json({
+    error: err
+  })
+})
+
+app.use((req, res, next) => {
+  res.status(404).json({
+    error: {
+      message: 'Not found'
+    }
+  })
+})
+
+module.exports = app
