@@ -4,11 +4,11 @@ const GitHubStrategy = require('passport-github').Strategy
 const userModel = require('../models/userModel.js')
 
 passport.serializeUser((user, done) => {
-  done(null, user.id)
+  done(null, user.githubId)
 })
 
 passport.deserializeUser((id, done) => {
-  userModel.getOneUser(id)
+  userModel.checkUser(id)
     .then((user) => {
       // console.log('deser ', user)
       // Do some passport session stuff,
@@ -39,6 +39,7 @@ passport.use(
       // console.log(profile.login)
 
       // Check if user is in our psql db, if not, make them
+      console.log(`profile: `, profile)
       userModel.checkUser(profile._json.id)
         .then((result) => {
           if (result) {
@@ -48,7 +49,8 @@ passport.use(
             // Create user
             let newUser = {
               username: profile.username,
-              githubId: profile.id
+              githubId: profile.id,
+              profilePic: profile._json.avatar_url
             }
             userModel.create(newUser)
             done(null, newUser) // when done is called, we go to passport.serializeUser

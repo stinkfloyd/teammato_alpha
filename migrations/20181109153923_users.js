@@ -2,8 +2,9 @@ exports.up = function (knex, Promise) {
   return knex.schema.createTable('users', function (table) {
     // TABLE COLUMN DEFINITIONS HERE
     table.increments()
-    table.varchar('username')
+    table.string('username')
     table.integer('githubId')
+    table.string('profilePic')
     table.timestamps(true, true)
   })
 }

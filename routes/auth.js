@@ -36,7 +36,7 @@ router.get('/github/callback', passport.authenticate('github'), (req, res) => {
   res.cookie("token", token, {
     expires: new Date(Date.now() + 9000000)
   })
-  res.redirect('/');
+  res.redirect('/profile');
 });
 
 module.exports = router;

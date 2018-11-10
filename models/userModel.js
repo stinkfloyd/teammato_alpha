@@ -31,6 +31,9 @@ const checkUser = (githubId) => {
   return knex('users')
     .where('githubId', githubId)
     .then(user => user[0])
+    .catch((err) => {
+      Promise.reject(err)
+    })
 }
 
 // Deletes a user with the given ID
